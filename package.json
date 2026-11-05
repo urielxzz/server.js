@@ -1,0 +1,10 @@
+{
+  "name": "voice-manager",
+  "type": "module",
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "@discordjs/voice": "^0.18.0",
+    "discord.js": "^14.16.3",
+    "express": "^4.21.1"
+  }
+}

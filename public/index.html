@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#080b11">
+<title>Voice Manager</title>
+<style>
+:root{--bg:#080b11;--card:#0f1622;--card2:#141d2b;--line:rgba(255,255,255,.08);--txt:#e9eefb;--mut:#8792a8;--acc:#7c8cf8;--ok:#34d399;--err:#fb7185}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,sans-serif;
+padding:calc(14px + env(safe-area-inset-top)) 14px calc(20px + env(safe-area-inset-bottom));max-width:430px;margin:0 auto}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:9px;font-size:12px;letter-spacing:.14em;font-weight:600}
+.logo{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--acc);color:#fff;font-size:13px}
+.k{font-size:10px;letter-spacing:.18em;color:var(--acc);font-weight:600;margin:0 0 6px}
+h1{font-size:23px;margin:0 0 6px;font-weight:600;letter-spacing:-.02em}
+.sub{font-size:12.5px;color:var(--mut);margin:0 0 16px}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.btn{border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:12px;padding:12px;
+font-size:12.5px;font-weight:500;font-family:inherit;min-height:44px;cursor:pointer}
+.btn.p{background:var(--acc);border-color:transparent;color:#fff}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:19px}.stat span{font-size:8.5px;letter-spacing:.1em;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px;margin-bottom:12px}
+.card h2{font-size:13px;margin:0 0 11px;font-weight:600;display:flex;gap:8px;align-items:center}
+.num{font-size:9px;background:rgba(124,140,248,.14);color:var(--acc);border-radius:6px;padding:3px 7px}
+input{width:100%;background:#0b111b;border:1px solid var(--line);color:var(--txt);border-radius:10px;
+padding:11px;font-size:16px;font-family:inherit;min-height:44px;margin-bottom:8px}
+input::placeholder{color:#5c6679;font-size:13px}
+input:focus{outline:none;border-color:var(--acc)}
+.add{width:100%;background:rgba(124,140,248,.12);border:1px dashed rgba(124,140,248,.4);color:var(--acc);
+border-radius:10px;padding:11px;font-size:12.5px;font-weight:600;font-family:inherit;min-height:44px;cursor:pointer}
+.item{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;gap:10px;align-items:center;margin-bottom:8px}
+.av{width:34px;height:34px;border-radius:9px;background:#1d2740;display:grid;place-items:center;font-size:13px;color:var(--mut);flex:0 0 auto;object-fit:cover}
+.info{flex:1;min-width:0}
+.info b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.info small{font-size:10.5px;color:var(--mut);display:flex;gap:5px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--mut)}
+.dot.on{background:var(--ok)}.dot.e{background:var(--err)}
+.m{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#0d141f;color:var(--mut);font-size:12px;cursor:pointer;flex:0 0 auto}
+.m.act{background:rgba(124,140,248,.18);color:var(--acc);border-color:rgba(124,140,248,.45)}
+.m.d{color:var(--err)}
+.empty{font-size:11.5px;color:var(--mut);text-align:center;padding:14px;border:1px dashed var(--line);border-radius:12px}
+.asg{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);font-size:11.5px}
+.asg span{color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip{font-size:10px;color:var(--acc);background:rgba(124,140,248,.12);border-radius:6px;padding:3px 7px}
+.note{font-size:10.5px;color:#5c6679;line-height:1.5;margin:10px 0 0}
+.toast{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35);color:var(--ok);
+font-size:11px;padding:9px 11px;border-radius:10px;margin-bottom:10px;display:none}
+.toast.bad{background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.35);color:var(--err)}
+</style>
+</head>
+<body>
+<div class="top"><div class="brand"><span class="logo">◉</span>VOICE MANAGER</div><span id="api" style="font-size:10px;color:var(--mut)">…</span></div>
+<div id="toast" class="toast"></div>
+<p class="k">CONTROL CENTER</p>
+<h1>Cuentas y canales</h1>
+<p class="sub">Los perfiles entran silenciados. Todo se guarda en el teléfono.</p>
+<div class="acts"><button class="btn" id="exp">⤓ Exportar</button><button class="btn p" id="dist">✦ Repartir auto</button></div>
+<div class="stats"><div class="stat"><b id="sP">0</b><span>PERFILES</span></div>
+<div class="stat"><b id="sC">0</b><span>CANALES</span></div><div class="stat"><b id="sA">0</b><span>EN VOZ</span></div></div>
+
+<div class="card"><h2><span class="num">1</span>Perfiles</h2>
+<input id="pA" placeholder="Alias (Alt 01)">
+<input id="pT" placeholder="Token de Discord" autocapitalize="off" spellcheck="false">
+<button class="add" id="addP">+ Añadir perfil</button>
+<div id="listP" style="margin-top:9px"></div></div>
+
+<div class="card"><h2><span class="num">2</span>Canales</h2>
+<input id="cI" placeholder="discord.gg/xxxx o ID de canal" autocapitalize="off" spellcheck="false">
+<input id="cK" type="number" min="1" max="99" value="5" placeholder="Cupo">
+<button class="add" id="addC">+ Añadir canal</button>
+<div id="listC" style="margin-top:9px"></div></div>
+
+<div class="card"><h2><span class="num">3</span>Reparto</h2><div id="box"></div></div>
+
+<div class="card"><h2><span class="num">4</span>Control</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+<button class="btn p" id="join">▶ Conectar todo</button>
+<button class="btn" id="leave">■ Desconectar</button>
+<button class="btn" id="mute">◐ Silenciar todo</button>
+<button class="btn" id="deaf">◉ Sordera total</button></div>
+<p class="note">Si algo falla, el motivo sale aquí y en la consola del servidor.</p></div>
+
+<script>
+const $=s=>document.querySelector(s),KEY='vm2';
+let S={profiles:[],channels:[]};
+try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+const save=()=>localStorage.setItem(KEY,JSON.stringify(S));
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9);
+function toast(m,b){const t=$('#toast');t.textContent=m;t.className='toast'+(b?' bad':'');t.style.display='block';setTimeout(()=>t.style.display='none',3500)}
+const post=(p,b)=>fetch(p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(async r=>{if(!r.ok)throw new Error(await r.text());return r.json().catch(()=>({}))});
+const ava=p=>p.av?`https://cdn.discordapp.com/avatars/${p.uid}/${p.av}.png?size=64`:'https://cdn.discordapp.com/embed/avatars/0.png';
+
+function render(){
+  $('#sP').textContent=S.profiles.length;$('#sC').textContent=S.channels.length;
+  $('#sA').textContent=S.profiles.filter(p=>p.on).length;
+  $('#listP').innerHTML=S.profiles.map(p=>`<div class="item"><img class="av" src="${ava(p)}">
+    <div class="info"><b>${esc(p.alias)}</b><small><span class="dot ${p.on?'on':p.err?'e':''}"></span>${esc(p.name||'sin verificar')}</small></div>
+    <button class="m ${p.mute?'act':''}" data-m="${p.id}">◐</button>
+    <button class="m ${p.deaf?'act':''}" data-d="${p.id}">◉</button>
+    <button class="m d" data-x="${p.id}">✕</button></div>`).join('')||'<div class="empty">Sin perfiles</div>';
+  $('#listC').innerHTML=S.channels.map(c=>`<div class="item"><div class="av">◈</div>
+    <div class="info"><b>${esc(c.name)}</b><small>${esc(c.guild||'')} · ${c.p.length}/${c.cap}</small></div>
+    <button class="m d" data-cx="${c.id}">✕</button></div>`).join('')||'<div class="empty">Sin canales</div>';
+  $('#box').innerHTML=S.channels.map(c=>`<div class="asg"><b>${esc(c.name)}</b><span class="chip">${c.p.length}/${c.cap}</span></div>
+    ${c.p.map(id=>{const p=S.profiles.find(x=>x.id===id);return p?`<div class="asg" style="padding-left:12px"><span>↳ ${esc(p.alias)}</span><button class="m d" data-un="${c.id}:${id}">✕</button></div>`:''}).join('')}
+    <button class="add" style="margin:7px 0 10px;padding:8px;min-height:34px" data-man="${c.id}">+ Asignar</button>`).join('')||'<div class="empty">Añade canales</div>';
+  save();
+}
+
+$('#addP').onclick=async()=>{
+  const a=$('#pA').value.trim(),t=$('#pT').value.trim();if(!t)return toast('Falta el token',true);
+  const p={id:uid(),alias:a||('Alt '+String(S.profiles.length+1).padStart(2,'0')),token:t,mute:true,deaf:false,on:false};
+  S.profiles.push(p);$('#pA').value='';$('#pT').value='';render();
+  try{const r=await fetch('https://discord.com/api/v10/users/@me',{headers:{Authorization:t}});
+    if(!r.ok)throw 0;const u=await r.json();p.uid=u.id;p.name=u.username;p.av=u.avatar;render();toast('Verificado: '+u.username)}
+  catch(e){p.err=1;render();toast('Token inválido',true)}
+};
+
+$('#addC').onclick=async()=>{
+  const raw=$('#cI').value.trim(),cap=Math.max(1,parseInt($('#cK').value||'5',10));
+  if(!raw)return toast('Falta el enlace',true);
+  const c={id:uid(),invite:raw,cap,p:[],name:'Canal',guild:''};
+  if(/^\d{17,20}$/.test(raw)){c.channelId=raw;c.name='Canal '+raw.slice(-4)}
+  S.channels.push(c);$('#cI').value='';render();
+  try{const j=await post('/api/resolve',{invite:raw});
+    c.guildId=j.guildId;c.channelId=j.channelId;c.name=j.channelName;c.guild=j.guildName;render();toast('Vinculado: '+j.guildName)}
+  catch(e){toast('No resolví el enlace',true)}
+};
+
+$('#dist').onclick=()=>{
+  if(!S.profiles.length||!S.channels.length)return toast('Faltan datos',true);
+  S.channels.forEach(c=>c.p=[]);let i=0,f=0;
+  for(const p of S.profiles){let ok=false,t=0;
+    while(!ok&&t<S.channels.length*2){const c=S.channels[i%S.channels.length];
+      if(c.p.length<c.cap){c.p.push(p.id);ok=true}i++;t++}
+    if(!ok)f++}
+  render();toast(f?f+' sin cupo':'Repartido',!!f);
+};
+
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const d=t.dataset;
+  if(d.x){S.profiles=S.profiles.filter(p=>p.id!==d.x);S.channels.forEach(c=>c.p=c.p.filter(i=>i!==d.x));render()}
+  if(d.cx){S.channels=S.channels.filter(c=>c.id!==d.cx);render()}
+  if(d.un){const[a,b]=d.un.split(':');const c=S.channels.find(x=>x.id===a);if(c)c.p=c.p.filter(i=>i!==b);render()}
+  if(d.man){const c=S.channels.find(x=>x.id===d.man);
+    const lib=S.profiles.filter(p=>!S.channels.some(ch=>ch.p.includes(p.id)));
+    if(!lib.length)return toast('Sin perfiles libres',true);
+    if(c.p.length>=c.cap)return toast('Canal lleno',true);
+    c.p.push(lib[0].id);render()}
+  if(d.m){const p=S.profiles.find(x=>x.id===d.m);p.mute=!p.mute;render();if(p.on)post('/api/state',{token:p.token,selfMute:p.mute,selfDeaf:p.deaf}).catch(()=>{})}
+  if(d.d){const p=S.profiles.find(x=>x.id===d.d);p.deaf=!p.deaf;render();if(p.on)post('/api/state',{token:p.token,selfMute:p.mute,selfDeaf:p.deaf}).catch(()=>{})}
+});
+
+$('#join').onclick=async()=>{
+  const jobs=[];S.channels.forEach(c=>c.p.forEach(id=>{const p=S.profiles.find(x=>x.id===id);if(p)jobs.push({p,c})}));
+  if(!jobs.length)return toast('Nada asignado',true);
+  let ok=0;
+  for(const {p,c} of jobs){
+    if(!c.channelId){p.err=1;render();continue}
+    p.on=false;render();
+    try{await post('/api/join',{token:p.token,guildId:c.guildId,channelId:c.channelId,selfMute:p.mute,selfDeaf:p.deaf});p.on=true;p.err=false;ok++}
+    catch(e){p.err=1;toast(e.message.slice(0,60),true)}
+    render();
+  }
+  toast('Conectados '+ok+'/'+jobs.length,ok<jobs.length);
+};
+$('#leave').onclick=async()=>{for(const p of S.profiles){if(p.on){try{await post('/api/leave',{token:p.token})}catch(e){}}p.on=false}render();toast('Fuera de voz')};
+$('#mute').onclick=()=>{const v=S.profiles.some(p=>!p.mute);S.profiles.forEach(p=>{p.mute=v;if(p.on)post('/api/state',{token:p.token,selfMute:v,selfDeaf:p.deaf}).catch(()=>{})});render();toast(v?'Todos silenciados':'Micrófono abierto')};
+$('#deaf').onclick=()=>{const v=S.profiles.some(p=>!p.deaf);S.profiles.forEach(p=>{p.deaf=v;if(p.on)post('/api/state',{token:p.token,selfMute:p.mute,selfDeaf:v}).catch(()=>{})});render();toast(v?'Sordera activada':'Audio restaurado')};
+$('#exp').onclick=()=>{const b=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='voice.json';a.click()};
+
+render();
+fetch('/api/health').then(r=>r.ok?$('#api').textContent='API OK':0).catch(()=>$('#api').textContent='API caída');
+</script>
+</body>
+</html>
