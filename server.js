@@ -87,4 +87,5 @@ app.post('/api/leave', async (req, res) => {
   res.json({ ok: true });
 });
 
-app.listen(3000, '0.0.0.0', () => console.log('LISTO -> http://localhost:3000'));
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => console.log('LISTO -> puerto ' + PORT));
